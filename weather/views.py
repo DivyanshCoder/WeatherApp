@@ -2,10 +2,11 @@ from django.shortcuts import render, HttpResponse, redirect
 from django.contrib import messages
 import requests
 import datetime
+import traceback    
 
 # Create your views here.
 def home(request):
-    if 'city' in request.POST:
+    if 'city' in request.POST and request.method == 'POST':
         city = request.POST['city']
     else:
         city = 'indore'
@@ -42,13 +43,12 @@ def home(request):
             'temp': temp,
             'day': day,
             'city': city,
-            'image_url':image_url
+            'image_url': image_url,
         })
-    except:
-        exception_occurred = {'error': 'Entered city is not available in API'}
+    except Exception as e:
+        print(f"Error: {e}")
+        traceback.print_exc()
         return redirect('city_not_found', city_name=city)
-        day = datetime.date.today()
-        return render(request, 'weather/index.html', {'description':'Clear Sky', 'icon':'01d', 'temp':25, 'day':day, 'city':'Indore','exception_occurred':exception_occurred})
-
+    
 def city_not_found(request, city_name):
     return render(request, 'weather/city_not_found.html', {'city': city_name})
