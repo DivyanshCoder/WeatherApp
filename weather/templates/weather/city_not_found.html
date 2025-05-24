@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>City Not Available</title>
+</head>
+<body>
+    <h2 style="font-size: 3.2em; text-align: center;">City {{city}} is not available in API.</h2>
+    <form style="text-align: center; border-radius: 5px;" action="{% url 'weather' %}">
+        <button style="background-color: lightblue; width: 100px; height: 26px;" text="submit">Go back.....</button>
+    </form>
+</body>
+</html>
