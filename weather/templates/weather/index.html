@@ -4,46 +4,303 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather App</title>
-    <link rel="stylesheet" href="{% static 'style.css' %}">
+    <title>Weather App - Current Weather</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        .background-container {
+            background-image: url('{% if exception_occurred %}https://images.pexels.com/photos/3008509/pexels-photo-3008509.jpeg?auto=compress&cs=tinysrgb&w=1600{% else %}{{ image_url }}{% endif %}');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .background-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 1;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(15px);
+            border-radius: 25px;
+            padding: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            color: white;
+            text-align: center;
+            max-width: 450px;
+            width: 90%;
+            position: relative;
+            z-index: 2;
+        }
+
+        .app-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(45deg, #ffd700, #ffeb3b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .search-form {
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1.1rem;
+            outline: none;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            min-width: 200px;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .search-input:focus {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .search-button {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(45deg, #00f2fe, #4facfe);
+        }
+
+        .weather-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .weather-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .temperature {
+            font-size: 4rem;
+            font-weight: 300;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            color: #ffd700;
+        }
+
+        .city-name {
+            font-size: 2rem;
+            font-weight: 600;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            margin-top: 0.5rem;
+        }
+
+        .weather-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .weather-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .weather-icon img {
+            width: 80px;
+            height: 80px;
+            filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.3));
+        }
+
+        .weather-info {
+            text-align: right;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .description {
+            font-size: 1.3rem;
+            font-weight: 500;
+            text-transform: capitalize;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .date {
+            font-size: 1rem;
+            opacity: 0.9;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem 1.5rem;
+                max-width: 95%;
+            }
+
+            .app-title {
+                font-size: 2rem;
+            }
+
+            .search-form {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .search-input {
+                width: 100%;
+                min-width: auto;
+            }
+
+            .weather-main {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .temperature {
+                font-size: 3rem;
+            }
+
+            .city-name {
+                font-size: 1.5rem;
+            }
+
+            .weather-details {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .weather-info {
+                text-align: center;
+            }
+        }
+
+        .loading {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid white;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
-    <div style="background-image: url('{% if exception_occurred %}https://images.pexels.com/photos/3008509/pexels-photo-3008509.jpeg?auto=compress&cs=tinysrgb&w=1600{% else %}{{ image_url }}{% endif %}');
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        width: 100vw;
-        height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;">
-    
+    <div class="background-container">
+        <div class="container">
+            <h1 class="app-title">⛅ Weather App</h1>
+            
+            <form method="POST" class="search-form">
+                {% csrf_token %}
+                <input type="text" name="city" placeholder="🔍 Enter city name..." class="search-input" required>
+                <button type="submit" class="search-button">Get Weather</button>
+            </form>
 
-    <div class="container">
-        <h1>Weather App</h1>
-        <form method="POST">
-            {% csrf_token %}
-            <input type="text" name="city" placeholder="Enter City.....">
-            <button type="submit">Search</button>
-        </form>
-        <div class="weather">
-            <div class="left">
-                <h2>{{ temp }}&#176; C</h2>
-                <h3>{{ city }}</h3>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p style="margin-top: 10px;">Loading weather data...</p>
             </div>
-            <div class="right">
-                <div class="icon">
-                    <p><img src="http://openweathermap.org/img/w/{{icon}}.png" width="100px"></p>
+
+            {% if temp %}
+            <div class="weather-card">
+                <div class="weather-main">
+                    <div class="left-info">
+                        <div class="temperature">{{ temp }}°C</div>
+                        <div class="city-name">{{ city }}</div>
+                    </div>
                 </div>
-                <div class="condition">
-                    <p>{{ description }}</p>
-                    <p>{{ day }}</p>
+                
+                <div class="weather-details">
+                    <div class="weather-icon">
+                        <img src="http://openweathermap.org/img/w/{{icon}}.png" alt="Weather icon">
+                    </div>
+                    <div class="weather-info">
+                        <div class="description">{{ description }}</div>
+                        <div class="date">{{ day }}</div>
+                    </div>
                 </div>
             </div>
+            {% endif %}
         </div>
     </div>
-{% if exception_occurred %}
-    
-{% endif %}
+
+    <script>
+        // Show loading spinner when form is submitted
+        document.querySelector('.search-form').addEventListener('submit', function() {
+            document.getElementById('loading').classList.add('show');
+        });
+    </script>
 </body>
 </html>
