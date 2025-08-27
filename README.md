@@ -25,3 +25,6 @@ A simple and beautiful weather application built with **Python, Django, ORM, HTM
 **Performance:** Django Caching, ThreadPoolExecutor  
 
 ---
+
+## 🚀 Deployment
+🔗 **Live site:** https://weatherapp-nr0o.onrender.com
